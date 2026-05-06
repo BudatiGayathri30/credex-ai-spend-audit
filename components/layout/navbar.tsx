@@ -2,8 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { label: "Benefits", href: "#benefits" },
-  { label: "Audit Form", href: "#audit-form" }
+  { label: "Features", href: "#features" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Audit", href: "#audit" }
 ];
 
 export function Navbar() {
@@ -16,16 +17,33 @@ export function Navbar() {
 
         <nav className="hidden items-center gap-6 md:flex">
           {navLinks.map((link) => (
-            <a key={link.href} href={link.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <a
+              key={link.href}
+              href={link.href}
+              className="relative text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground active:text-foreground"
+            >
               {link.label}
+              <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all duration-200 hover:w-full" />
             </a>
           ))}
         </nav>
 
         <Button asChild size="sm">
-          <a href="#audit-form">Audit My AI Spend</a>
+          <a href="#audit">Audit My AI Spend</a>
         </Button>
       </div>
+
+      <nav className="container flex h-12 items-center gap-5 overflow-x-auto whitespace-nowrap md:hidden">
+        {navLinks.map((link) => (
+          <a
+            key={link.href}
+            href={link.href}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground active:text-foreground"
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
     </header>
   );
 }

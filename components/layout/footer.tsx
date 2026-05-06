@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const footerLinks = [
-  { label: "Benefits", href: "#benefits" },
+  { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Audit Form", href: "#audit-form" }
+  { label: "Audit", href: "#audit" }
 ];
 
 const socialLinks = [

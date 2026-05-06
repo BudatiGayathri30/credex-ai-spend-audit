@@ -2,7 +2,7 @@ import { AuditForm } from "@/components/forms/audit-form";
 
 export function AuditFormSection() {
   return (
-    <section id="audit-form" className="border-t border-border bg-muted/30 py-16 md:py-24">
+    <section id="audit" className="border-t border-border bg-muted/30 py-16 md:py-24">
       <div className="container">
         <div className="mx-auto mb-8 max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">See where your AI budget can improve</h2>

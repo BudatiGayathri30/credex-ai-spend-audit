@@ -26,7 +26,7 @@ const benefits = [
 
 export function BenefitsSection() {
   return (
-    <section id="benefits" className="container py-16 md:py-24">
+    <section id="features" className="container py-16 md:py-24">
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Built to optimize your AI budget</h2>
         <p className="mt-3 text-muted-foreground">Everything your startup needs to control AI spend without slowing teams down.</p>
