@@ -1,47 +1,77 @@
 # AI Spend Audit SaaS
 
-AI Spend Audit is a SaaS landing experience for startups that want better visibility into AI tooling costs.  
-It helps teams organize spend inputs across tools like ChatGPT, Claude, Cursor, Gemini, and Copilot, and prepares the foundation for actionable optimization recommendations.  
-This repository currently contains the production-style frontend UI, local audit engine, and recommendation results workflow.
+AI Spend Audit is a SaaS landing experience for startups that want better visibility into AI tooling costs.
+It helps teams analyze AI software spending across tools like ChatGPT, Claude, Cursor, Gemini, and Copilot, and generates actionable optimization recommendations with estimated monthly and annual savings.
+This repository currently contains the production-style frontend UI, recommendation engine, backend persistence flow, AI-generated summaries, and shareable audit result workflow.
 
 ## Features Implemented (So Far)
 
-- Modern SaaS landing page UI (navbar, hero, benefits, how-it-works, footer)
-- Responsive, mobile-first layout with improved navigation UX
-- AI spend audit form UI built with React Hook Form + Zod validation
-- Pricing configuration system for major AI tools and plans
-- Core recommendation engine with downgrade + alternative suggestions
-- Monthly and annual savings calculations with confidence scoring
-- Responsive results dashboard (savings hero + recommendation cards)
-- Typed audit result models and reusable calculation interfaces
-- Reusable component architecture using shadcn-style UI primitives
-- Type-safe codebase structure with modular sections and validation schema
+* Modern SaaS landing page UI (navbar, hero, benefits, how-it-works, footer)
+* Responsive, mobile-first layout with improved navigation UX
+* AI spend audit form UI built with React Hook Form + Zod validation
+* Pricing configuration system for major AI tools and plans
+* Core recommendation engine with downgrade + alternative suggestions
+* Monthly and annual savings calculations with confidence scoring
+* Responsive results dashboard (savings hero + recommendation cards)
+* AI-generated personalized audit summaries with graceful fallback handling
+* Supabase-based audit persistence and lead storage
+* Lead capture flow with optional company + role information
+* Transactional email confirmation flow using Resend
+* Public shareable audit result pages
+* Open Graph + Twitter metadata support for shared audits
+* Typed audit result models and reusable calculation interfaces
+* Reusable component architecture using shadcn-style UI primitives
+* Type-safe codebase structure with modular sections and validation schema
 
 ## Tech Stack
 
-- Next.js 15 (App Router)
-- TypeScript
-- Tailwind CSS
-- shadcn/ui-style component patterns
-- React Hook Form
-- Zod
+* Next.js 15 (App Router)
+* TypeScript
+* Tailwind CSS
+* shadcn/ui-style component patterns
+* React Hook Form
+* Zod
+* Supabase
+* OpenAI API
+* Resend
 
 ## Local Setup
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
-2. Start development server:
+
+2. Configure environment variables:
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   OPENAI_API_KEY=
+   RESEND_API_KEY=
+   ```
+
+3. Start development server:
+
    ```bash
    npm run dev
    ```
-3. Run lint checks:
+
+4. Run lint checks:
+
    ```bash
    npm run lint
    ```
-4. Open:
-   [http://localhost:3000](http://localhost:3000)
+
+5. Run TypeScript validation:
+
+   ```bash
+   npx tsc --noEmit
+   ```
+
+6. Open:
+   http://localhost:3000
 
 ## Folder Structure (Overview)
 
@@ -52,43 +82,64 @@ components/
   sections/           # Hero, Benefits, How It Works, Form section wrappers
   forms/              # Audit form UI
   audit/              # Results summary and recommendation rendering components
-  ui/                 # Reusable UI primitives (button, card, input, select, etc.)
+  ui/                 # Reusable UI primitives
 lib/
-  validations/        # Zod schemas and form validation logic
-  pricing.ts          # Plan pricing definitions + pricing helpers
-  audit-engine.ts     # Recommendation rules and savings computation pipeline
+  validations/        # Zod schemas and validation logic
+  pricing.ts          # Pricing definitions + pricing helpers
+  audit-engine.ts     # Recommendation rules and savings engine
+services/
+  supabase.ts         # Supabase client + persistence helpers
+  openai.ts           # AI summary generation logic
+  resend.ts           # Transactional email integration
 types/                # Shared TypeScript types
 ```
 
 ## Audit Engine Overview
 
-The current audit system runs fully on the client for rapid iteration:
+The audit workflow currently follows this pipeline:
 
-1. Form values are validated and submitted from `components/forms/audit-form.tsx`.
+1. Users submit AI tooling spend information through the audit form.
 2. Tool + plan metadata are resolved from `lib/pricing.ts`.
-3. `lib/audit-engine.ts` applies recommendation rules:
-   - downgrade opportunities for over-provisioned plans
-   - alternative stack suggestions for larger teams
-   - seat-level optimization fallback
-4. A typed `AuditResult` is returned and rendered in:
-   - `components/audit/savings-hero.tsx`
-   - `components/audit/tool-recommendation-card.tsx`
-   - `components/audit/results-summary.tsx`
+3. `lib/audit-engine.ts` evaluates:
+
+   * downgrade opportunities
+   * over-provisioned plans
+   * alternative stack suggestions
+   * optimization opportunities based on team size and use case
+4. Monthly + annual savings estimates are generated.
+5. OpenAI generates a concise personalized audit summary.
+6. Audit results and lead capture data are persisted to Supabase.
+7. Public shareable audit URLs are generated for viral sharing.
 
 ## Current Progress
 
-**Milestone:** Day 2 core audit engine completed.
+**Milestone:** Day 3 backend and AI workflow completed.
 
-- Landing + navigation system complete
-- Form + schema validation complete
-- Pricing model + recommendation logic complete
-- Savings and confidence result rendering complete
-- Next milestone: expand recommendation depth and calibration with real usage scenarios
+Completed:
+
+* Landing + navigation system
+* Form + schema validation
+* Pricing model + recommendation engine
+* Savings and confidence rendering
+* AI-generated summaries
+* Supabase persistence
+* Lead capture flow
+* Transactional email integration
+* Public shareable audit pages
+* Open Graph metadata support
+
+Next milestone:
+
+* automated testing
+* CI workflow
+* benchmark mode
+* deployment optimization
+* deeper recommendation calibration
 
 ## Deployment URL
 
-_TBD — add production/staging URL after first deployment._
+*TBD — add production/staging URL after deployment.*
 
 ## Screenshots
 
-_TBD — add landing page and form screenshots after UI stabilization._
+*TBD — add landing page, results dashboard, and shareable audit screenshots after UI stabilization.*
