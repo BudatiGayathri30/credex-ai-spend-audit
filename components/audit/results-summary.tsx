@@ -4,15 +4,23 @@ import { ToolRecommendationCard } from "@/components/audit/tool-recommendation-c
 
 interface ResultsSummaryProps {
   result: AuditResult;
+  aiSummary?: string | null;
 }
 
-export function ResultsSummary({ result }: ResultsSummaryProps) {
+export function ResultsSummary({ result, aiSummary }: ResultsSummaryProps) {
   return (
     <section className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-2xl font-semibold tracking-tight">Your audit recommendations</h3>
         <p className="text-sm text-muted-foreground">Avg confidence: {Math.round(result.summary.averageConfidence * 100)}%</p>
       </div>
+
+      {aiSummary ? (
+        <div className="rounded-2xl border border-border bg-muted/30 p-5">
+          <p className="text-sm font-medium">AI summary</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{aiSummary}</p>
+        </div>
+      ) : null}
 
       <SavingsHero summary={result.summary} />
 
