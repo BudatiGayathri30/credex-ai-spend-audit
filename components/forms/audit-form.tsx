@@ -13,6 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { AuditResult } from "@/types/audit-result";
+import type { CreateAuditResponse } from "@/types/audit-persistence";
+import { LeadCaptureForm } from "@/components/forms/lead-capture";
+import { ShareAuditLink } from "@/components/audit/share-audit-link";
 
 const aiTools = [
   { label: "ChatGPT", value: "chatgpt" },
@@ -66,6 +69,11 @@ const planOptionsByTool: Record<string, { label: string; value: string }[]> = {
 
 export function AuditForm() {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [auditId, setAuditId] = useState<string | null>(null);
+  const [publicShareId, setPublicShareId] = useState<string | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [persistError, setPersistError] = useState<string | null>(null);
+  const [isPersisting, setIsPersisting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -90,8 +98,40 @@ export function AuditForm() {
   }, [selectedTool]);
 
   const onSubmit = async (values: AuditFormValues) => {
+    // Optimistic UI: show local results immediately, then persist + enrich in the background.
+    const local = generateAuditResult(values);
+    setAuditResult(local);
+    setAuditId(null);
+    setPublicShareId(null);
+    setAiSummary(null);
+    setPersistError(null);
+
     await new Promise((resolve) => setTimeout(resolve, 300));
-    setAuditResult(generateAuditResult(values));
+
+    setIsPersisting(true);
+    try {
+      const res = await fetch("/api/audits/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
+      });
+
+      const data = (await res.json()) as CreateAuditResponse;
+
+      if (!res.ok) {
+        setPersistError((data as unknown as { error?: string })?.error ?? "Could not save your audit. Please try again.");
+        return;
+      }
+
+      setAuditId(data.id);
+      setPublicShareId(data.public_share_id);
+      setAiSummary(data.ai_summary);
+      setAuditResult(data.auditResult);
+    } catch {
+      setPersistError("Could not save your audit. You can still view results, but saving and sharing may be unavailable.");
+    } finally {
+      setIsPersisting(false);
+    }
   };
 
   return (
@@ -178,7 +218,21 @@ export function AuditForm() {
         </CardContent>
       </Card>
 
-      {auditResult && <ResultsSummary result={auditResult} />}
+      {auditResult && (
+        <div className="space-y-6">
+          <ResultsSummary result={auditResult} aiSummary={aiSummary} />
+
+          <ShareAuditLink publicShareId={publicShareId} />
+
+          {isPersisting && !auditId ? (
+            <p className="text-sm text-muted-foreground">Saving your audit and generating an AI summary...</p>
+          ) : null}
+
+          {persistError ? <p className="text-sm text-red-600">{persistError}</p> : null}
+
+          <LeadCaptureForm auditId={auditId} />
+        </div>
+      )}
     </div>
   );
 }
