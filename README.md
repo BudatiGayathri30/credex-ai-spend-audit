@@ -46,10 +46,13 @@ This repository currently contains the production-style frontend UI, recommendat
 2. Configure environment variables:
 
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   SUPABASE_URL=
+   SUPABASE_SERVICE_ROLE_KEY=
    OPENAI_API_KEY=
+   OPENAI_MODEL=gpt-4.1-mini
    RESEND_API_KEY=
+   RESEND_FROM_EMAIL=
    ```
 
 3. Start development server:
@@ -67,11 +70,37 @@ This repository currently contains the production-style frontend UI, recommendat
 5. Run TypeScript validation:
 
    ```bash
-   npx tsc --noEmit
+   npm run typecheck
    ```
 
-6. Open:
+6. Run test suite:
+
+   ```bash
+   npm run test
+   ```
+
+7. Open:
    http://localhost:3000
+
+## CI Status
+
+- GitHub Actions workflow: `.github/workflows/ci.yml`
+- Trigger: push to `main`
+- Checks: dependency install, lint, strict TypeScript validation, and test execution
+
+## Pricing Verification
+
+- Pricing assumptions are documented and date-stamped in `PRICING_DATA.md`.
+- Sources are official pricing URLs for each supported platform.
+- Recommendation logic in `lib/audit-engine.ts` is constrained to avoid unrealistic savings outputs.
+
+## Business and Strategy Docs
+
+- `METRICS.md`: North Star metric, input metrics, instrumentation, pivot thresholds
+- `GTM.md`: target user, channel strategy, first 100 users plan, traction expectations
+- `ECONOMICS.md`: unit economics assumptions and path to $1M ARR
+- `LANDING_COPY.md`: production-ready landing copy draft
+- `REFLECTION.md`: assignment reflection and self-rating
 
 ## Folder Structure (Overview)
 
@@ -113,7 +142,7 @@ The audit workflow currently follows this pipeline:
 
 ## Current Progress
 
-**Milestone:** Day 3 backend and AI workflow completed.
+**Milestone:** Day 4 quality and readiness pass completed.
 
 Completed:
 
@@ -127,14 +156,26 @@ Completed:
 * Transactional email integration
 * Public shareable audit pages
 * Open Graph metadata support
+* Deterministic unit tests for pricing and audit rules
+* GitHub Actions CI pipeline
+* Pricing source verification documentation
+* Recommendation safety constraints for low-spend and zero-seat anomalies
+* Business strategy and unit economics documentation
 
 Next milestone:
 
-* automated testing
-* CI workflow
-* benchmark mode
-* deployment optimization
-* deeper recommendation calibration
+* production deployment hardening
+* auth + role-scoped internal views
+* analytics dashboard instrumentation
+* recommendation calibration from live usage
+* outbound and referral experiments
+
+## Architecture Maturity Updates
+
+- Core engine remains deterministic and typed.
+- Recommendation outputs now include stronger fallback messaging when no material savings are detected.
+- Aggregate savings logic applies safety constraints to prevent over-promising.
+- Abuse prevention strategy is documented in `ARCHITECTURE.md` (rate limits + anti-spam tradeoffs for MVP).
 
 ## Deployment URL
 

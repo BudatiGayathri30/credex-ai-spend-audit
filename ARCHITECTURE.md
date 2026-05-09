@@ -1,4 +1,4 @@
-# Architecture Overview (Day 3)
+# Architecture Overview (Day 4)
 
 ## High-Level App Structure
 
@@ -65,6 +65,75 @@ Keeping pricing separate from recommendation logic makes rule tuning easier and 
 3. **Optimization fallback:** suggests the most efficient available seat-level plan when appropriate.
 4. **Savings aggregation:** computes total monthly and annual savings.
 5. **Confidence scoring:** estimates recommendation reliability based on pricing and seat assumptions.
+
+## Recommendation Safety Constraints
+
+The engine now applies explicit safety rules to improve trust:
+
+- Normalize invalid/edge numeric inputs (seat count, team size, spend) to safe minimums.
+- Suppress aggressive recommendations for low-spend anomalies (very low spend per seat).
+- Cap recommendation savings with a maximum savings ratio to avoid unrealistic outputs.
+- Avoid overcounting by realizing one recommendation path in summary totals while still listing alternatives.
+- Provide fallback "no urgent action" messaging when no meaningful savings are available.
+
+These constraints live in `lib/audit-engine.ts` and are unit tested.
+
+## Testing Strategy
+
+Current tests focus on deterministic core logic:
+
+- `tests/audit-engine.test.ts`
+  - savings math
+  - downgrade and alternative recommendation gates
+  - confidence range checks
+  - zero-seat defensive handling
+  - low-spend anomaly suppression
+- `tests/pricing.test.ts`
+  - alias/plan resolution
+  - pricing estimate helpers
+  - pricing catalog sanity checks
+
+The strategy intentionally prioritizes confidence in business-critical calculations over UI snapshot coverage.
+
+## CI Pipeline
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push to `main`:
+
+1. install dependencies via `npm ci`
+2. run lint (`npm run lint`)
+3. run strict TypeScript checks (`npm run typecheck`)
+4. run tests (`npm run test`)
+
+This keeps MVP quality gates lightweight while preventing regressions in recommendation logic.
+
+## Validation Flow
+
+Validation is layered:
+
+1. Form-level validation with Zod (`lib/validations/audit-form.ts`).
+2. Type-level validation via strict TypeScript contracts (`types/` + strict compiler settings).
+3. Rule-level validation through unit tests around deterministic recommendation logic.
+4. Runtime fallback handling in external services (`services/openai.ts`, `services/resend.ts`) to avoid broken user flow during provider issues.
+
+## Abuse Protection Notes (MVP)
+
+Chosen approach:
+
+- Use server-side request throttling per IP/session on lead capture and audit creation endpoints.
+- Add honeypot field + minimum completion-time heuristics to reduce bot form submissions.
+- Keep rate limits coarse (for example: 5 audit submissions per 10 minutes per IP) to avoid blocking real users.
+
+Why this approach:
+
+- Minimal implementation overhead for MVP.
+- Effective against common low-effort spam patterns.
+- Does not require introducing heavy external dependencies at this phase.
+
+MVP tradeoffs:
+
+- IP-based limits can affect shared office networks.
+- Sophisticated abuse actors can bypass simple heuristics.
+- If abuse volume increases, migrate to managed edge-based rate limiting + reputation scoring.
 
 ## Backend Persistence Flow
 
