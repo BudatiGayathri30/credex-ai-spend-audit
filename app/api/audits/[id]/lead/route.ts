@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { leadCaptureSchema } from "@/lib/validations/lead-capture";
 import { sendLeadConfirmationEmail } from "@/services/resend";
 import { updateLeadCapture } from "@/services/supabase";
 import type { LeadCaptureResponse } from "@/types/audit-persistence";
 
-export async function POST(req: Request, context: { params: { id: string } }) {
+export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const body = await req.json();
     const values = leadCaptureSchema.parse(body);
 
-    const auditId = context.params.id;
+    const { id: auditId } = await context.params;
     const updated = await updateLeadCapture({
       auditId,
       email: values.email,
