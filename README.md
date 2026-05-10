@@ -1,186 +1,159 @@
-# AI Spend Audit SaaS
+# AI Spend Audit SaaS (Credex)
 
-AI Spend Audit is a SaaS landing experience for startups that want better visibility into AI tooling costs.
-It helps teams analyze AI software spending across tools like ChatGPT, Claude, Cursor, Gemini, and Copilot, and generates actionable optimization recommendations with estimated monthly and annual savings.
-This repository currently contains the production-style frontend UI, recommendation engine, backend persistence flow, AI-generated summaries, and shareable audit result workflow.
+Credex is a lean B2B lead-gen MVP: a founder-friendly **AI spend audit** that turns self-serve inputs into **deterministic savings estimates**, an **optional OpenAI narrative summary**, **Supabase persistence**, **shareable public audit URLs**, and a **lightweight lead + Resend confirmation** flow.
 
-## Features Implemented (So Far)
+The product is designed to feel **launchable** (clear value, believable numbers, shareable output) without pretending to be enterprise procurement software.
 
-* Modern SaaS landing page UI (navbar, hero, benefits, how-it-works, footer)
-* Responsive, mobile-first layout with improved navigation UX
-* AI spend audit form UI built with React Hook Form + Zod validation
-* Pricing configuration system for major AI tools and plans
-* Core recommendation engine with downgrade + alternative suggestions
-* Monthly and annual savings calculations with confidence scoring
-* Responsive results dashboard (savings hero + recommendation cards)
-* AI-generated personalized audit summaries with graceful fallback handling
-* Supabase-based audit persistence and lead storage
-* Lead capture flow with optional company + role information
-* Transactional email confirmation flow using Resend
-* Public shareable audit result pages
-* Open Graph + Twitter metadata support for shared audits
-* Typed audit result models and reusable calculation interfaces
-* Reusable component architecture using shadcn-style UI primitives
-* Type-safe codebase structure with modular sections and validation schema
+---
 
-## Tech Stack
+## Production-ready feature summary
 
-* Next.js 15 (App Router)
-* TypeScript
-* Tailwind CSS
-* shadcn/ui-style component patterns
-* React Hook Form
-* Zod
-* Supabase
-* OpenAI API
-* Resend
+- **Landing experience:** responsive hero, benefits, how-it-works, sticky nav with sensible scroll offset.
+- **Audit engine:** downgrade, alternative stack, and optimization paths with **savings caps**, **low-spend anomaly handling**, and **confidence scoring** (`lib/audit-engine.ts`).
+- **Results UI:** savings hero, recommendation cards, AI summary block with loading skeleton while the server responds.
+- **Persistence:** Supabase insert for audits; lead fields updated post-capture (`services/supabase.ts`).
+- **AI summaries:** OpenAI JSON-mode prompt with deterministic fallback (`services/openai.ts`). See `PROMPTS.md`.
+- **Email:** Resend transactional confirmation when keys are configured (`services/resend.ts`).
+- **Share pages:** `/audit/[id]` with dynamic **Open Graph** metadata (title, description, canonical `openGraph.url` when `NEXT_PUBLIC_APP_URL` is set).
+- **Quality:** ESLint, strict TypeScript, Vitest suites, GitHub Actions **including production build**.
 
-## Local Setup
+---
 
-1. Install dependencies:
+## Live demo & media (placeholders)
+
+| Asset | Link / location |
+| --- | --- |
+| **Production URL** | *TBD — e.g. `https://credex-ai-spend-audit.vercel.app`* |
+| **Screenshots** | Add PNGs after deploy: landing, results + AI summary, share URL row, mobile audit, public share preview. See `SUBMISSION_PREP.md`. |
+| **Loom walkthrough** | *TBD — follow the script in `SUBMISSION_PREP.md` (~3–4 min).* |
+
+---
+
+## Tech stack
+
+- Next.js 15 (App Router), TypeScript (strict), Tailwind CSS  
+- React Hook Form + Zod  
+- Supabase (`@supabase/supabase-js`)  
+- OpenAI + Resend  
+- Vitest + GitHub Actions CI  
+
+---
+
+## Local setup
+
+1. **Install**
 
    ```bash
    npm install
    ```
 
-2. Configure environment variables:
+2. **Environment** — copy `.env.example` to `.env.local` and fill values (never commit secrets):
 
-   ```env
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
-   SUPABASE_URL=
-   SUPABASE_SERVICE_ROLE_KEY=
-   OPENAI_API_KEY=
-   OPENAI_MODEL=gpt-4.1-mini
-   RESEND_API_KEY=
-   RESEND_FROM_EMAIL=
-   ```
+   | Variable | Required for | Notes |
+   | --- | --- | --- |
+   | `NEXT_PUBLIC_APP_URL` | OG URLs, absolute links | In prod, set to your canonical site URL (no trailing slash recommended). |
+   | `SUPABASE_URL` | Save audits, share pages, leads | Required at **runtime** for API/share routes (not imported at module top). |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Same | Service role stays **server-only**; never expose to the client. |
+   | `OPENAI_API_KEY` | Model-generated summaries | Optional: falls back to template summary if missing. |
+   | `OPENAI_MODEL` | Same | Defaults to `gpt-4.1-mini` in code. |
+   | `RESEND_API_KEY` | Confirmation email | Optional: lead still saves if email fails. |
+   | `RESEND_FROM_EMAIL` | Same | Verified sender identity in Resend. |
 
-3. Start development server:
+3. **Run**
 
    ```bash
    npm run dev
    ```
 
-4. Run lint checks:
+   Open http://localhost:3000  
+
+4. **Quality gates**
 
    ```bash
    npm run lint
-   ```
-
-5. Run TypeScript validation:
-
-   ```bash
    npm run typecheck
-   ```
-
-6. Run test suite:
-
-   ```bash
    npm run test
+   npm run build
    ```
 
-7. Open:
-   http://localhost:3000
+---
 
-## CI Status
+## Testing & CI
 
-- GitHub Actions workflow: `.github/workflows/ci.yml`
-- Trigger: push to `main`
-- Checks: dependency install, lint, strict TypeScript validation, and test execution
+- **How to run tests:** `npm run test` (Vitest). Philosophy and case coverage live in **`TESTS.md`**.
+- **CI:** `.github/workflows/ci.yml` on push to `main` — `npm ci` → `lint` → `typecheck` → `test` → **`build`** (validates production compile without requiring secrets in GitHub; server env validation runs when routes execute).
 
-## Pricing Verification
+---
 
-- Pricing assumptions are documented and date-stamped in `PRICING_DATA.md`.
-- Sources are official pricing URLs for each supported platform.
-- Recommendation logic in `lib/audit-engine.ts` is constrained to avoid unrealistic savings outputs.
+## Deployment (Vercel)
 
-## Business and Strategy Docs
+1. Import the GitHub repo into [Vercel](https://vercel.com).
+2. **Framework preset:** Next.js (default).
+3. **Environment variables:** add every variable from the table above (Production + Preview as needed).
+4. **Root directory:** repository root (default).
+5. **Deploy:** first deploy should succeed if CI passes locally.
+6. **Post-deploy checks:** follow **Production verification** below.
 
-- `METRICS.md`: North Star metric, input metrics, instrumentation, pivot thresholds
-- `GTM.md`: target user, channel strategy, first 100 users plan, traction expectations
-- `ECONOMICS.md`: unit economics assumptions and path to $1M ARR
-- `LANDING_COPY.md`: production-ready landing copy draft
-- `REFLECTION.md`: assignment reflection and self-rating
+---
 
-## Folder Structure (Overview)
+## Production verification checklist
+
+- [ ] `NEXT_PUBLIC_APP_URL` matches the deployed hostname (fixes OG URL and metadata base).
+- [ ] Submit audit → persistence succeeds (Supabase rows created).
+- [ ] Open **`/audit/{public_share_id}`** from the response; page renders and matches dashboard numbers.
+- [ ] Share URL in Slack/iMessage shows a sensible **title + description** (OG).
+- [ ] Lead capture saves and, with Resend configured, sends email (check spam folder once).
+- [ ] Mobile: complete audit without horizontal scroll; sticky header does not trap focus.
+- [ ] Browser console: no React hydration errors on landing and share pages.
+
+**Build note:** Supabase and Resend clients validate env at **request time**, so `next build` and CI can run without production secrets while keeping runtime failures explicit if keys are missing.
+
+---
+
+## Pricing verification
+
+Assumptions, official sources, and verification dates are centralized in **`PRICING_DATA.md`**. Recommendation logic intentionally stays conservative—see **`lib/audit-engine.ts`** and tests.
+
+---
+
+## Business, product & submission docs
+
+| File | Contents |
+| --- | --- |
+| `METRICS.md` | North Star, inputs, instrumentation, pivot thresholds |
+| `GTM.md` | ICP, channels, first 100 users |
+| `ECONOMICS.md` | Unit economics, path to $1M ARR (rough, honest math) |
+| `LANDING_COPY.md` | Hero, FAQ, social proof draft |
+| `USER_INTERVIEWS.md` | Three realistic discovery-style interviews |
+| `SUBMISSION_PREP.md` | Checklist, risks, screenshot list, Loom script, reviewer order |
+| `REFLECTION.md` | Assignment reflection (bugs, reversals, AI usage honesty) |
+
+---
+
+## Architecture maturity (Day 5)
+
+- **Deterministic core:** pricing + rules stay in TypeScript; the model only narrates.
+- **Safety rails:** savings ratio cap, anomaly guardrails, transparent fallback copy.
+- **Deployment-friendly:** lazy env validation for server services; production build in CI.
+- **UX/a11y pass:** landmark-friendly headings, form `aria-invalid` / `role="alert"`, live regions for async states, scroll targets for in-page nav.
+
+High-level flow is described in **`ARCHITECTURE.md`**.
+
+---
+
+## Folder structure (overview)
 
 ```text
-app/                  # App Router pages, layout, global styles
-components/
-  layout/             # Navbar, Footer
-  sections/           # Hero, Benefits, How It Works, Form section wrappers
-  forms/              # Audit form UI
-  audit/              # Results summary and recommendation rendering components
-  ui/                 # Reusable UI primitives
-lib/
-  validations/        # Zod schemas and validation logic
-  pricing.ts          # Pricing definitions + pricing helpers
-  audit-engine.ts     # Recommendation rules and savings engine
-services/
-  supabase.ts         # Supabase client + persistence helpers
-  openai.ts           # AI summary generation logic
-  resend.ts           # Transactional email integration
-types/                # Shared TypeScript types
+app/                  # App Router, API routes, share pages
+components/           # Layout, sections, forms, audit UI, primitives
+lib/                  # pricing, audit engine, validations
+services/             # Supabase, OpenAI, Resend (server-only modules)
+tests/                # Vitest
+types/                # Shared TS types
 ```
 
-## Audit Engine Overview
+---
 
-The audit workflow currently follows this pipeline:
+## License / usage
 
-1. Users submit AI tooling spend information through the audit form.
-2. Tool + plan metadata are resolved from `lib/pricing.ts`.
-3. `lib/audit-engine.ts` evaluates:
-
-   * downgrade opportunities
-   * over-provisioned plans
-   * alternative stack suggestions
-   * optimization opportunities based on team size and use case
-4. Monthly + annual savings estimates are generated.
-5. OpenAI generates a concise personalized audit summary.
-6. Audit results and lead capture data are persisted to Supabase.
-7. Public shareable audit URLs are generated for viral sharing.
-
-## Current Progress
-
-**Milestone:** Day 4 quality and readiness pass completed.
-
-Completed:
-
-* Landing + navigation system
-* Form + schema validation
-* Pricing model + recommendation engine
-* Savings and confidence rendering
-* AI-generated summaries
-* Supabase persistence
-* Lead capture flow
-* Transactional email integration
-* Public shareable audit pages
-* Open Graph metadata support
-* Deterministic unit tests for pricing and audit rules
-* GitHub Actions CI pipeline
-* Pricing source verification documentation
-* Recommendation safety constraints for low-spend and zero-seat anomalies
-* Business strategy and unit economics documentation
-
-Next milestone:
-
-* production deployment hardening
-* auth + role-scoped internal views
-* analytics dashboard instrumentation
-* recommendation calibration from live usage
-* outbound and referral experiments
-
-## Architecture Maturity Updates
-
-- Core engine remains deterministic and typed.
-- Recommendation outputs now include stronger fallback messaging when no material savings are detected.
-- Aggregate savings logic applies safety constraints to prevent over-promising.
-- Abuse prevention strategy is documented in `ARCHITECTURE.md` (rate limits + anti-spam tradeoffs for MVP).
-
-## Deployment URL
-
-*TBD — add production/staging URL after deployment.*
-
-## Screenshots
-
-*TBD — add landing page, results dashboard, and shareable audit screenshots after UI stabilization.*
+Private assignment / portfolio repository — adjust as needed for your program’s submission rules.

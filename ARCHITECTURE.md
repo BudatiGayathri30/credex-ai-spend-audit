@@ -1,4 +1,4 @@
-# Architecture Overview (Day 4)
+# Architecture Overview (Day 5)
 
 ## High-Level App Structure
 
@@ -103,8 +103,44 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push to `main`:
 2. run lint (`npm run lint`)
 3. run strict TypeScript checks (`npm run typecheck`)
 4. run tests (`npm run test`)
+5. run a production build (`npm run build`)
 
-This keeps MVP quality gates lightweight while preventing regressions in recommendation logic.
+Including `next build` catches App Router typing drift (for example, dynamic segment `params` contract changes across Next minors) without needing production secrets in the workflow: Supabase and Resend configuration is validated when those code paths execute, not when the module is first evaluated.
+
+### CI/CD maturity
+
+* **Strengths:** deterministic unit tests guard pricing and savings logic; CI mirrors local quality gates plus compile check.  
+* **Gaps:** no automated preview-environment smoke tests; no canary deployments; secrets managed manually in Vercel (acceptable for MVP).  
+* **Next increment:** optional Playwright smoke after deploy, or a scheduled health check hitting `/` and a synthetic audit API call in staging only.
+
+## Deployment architecture
+
+**Runtime:** Vercel serverless functions back the App Router API routes (`/api/audits/create`, `/api/audits/[id]/lead`).  
+**Data:** Supabase Postgres holds audit payloads and lead fields; public reads use `public_share_id` only (no auth in MVP).  
+**Edge config:** set `NEXT_PUBLIC_APP_URL` to the production origin so root + share metadata resolve canonical Open Graph URLs.  
+**Email:** Resend HTTP API from the lead route; failures are non-blocking for persistence.
+
+```text
+User → Vercel (Next.js) → API routes → Supabase (service role, server-only)
+                         ↘ OpenAI (summary) ↙
+                         ↘ Resend (email)   ↙
+```
+
+## Production verification flow
+
+1. **Build:** `npm run build` locally or via CI.  
+2. **Configure:** all env vars in Vercel (see README table).  
+3. **Smoke:** submit audit → confirm DB row + share ID → open `/audit/{id}` incognito.  
+4. **Social:** paste share URL; confirm OG title/description.  
+5. **Lead:** submit email; confirm row update + optional Resend delivery.  
+6. **UX:** keyboard-only pass on audit form; mobile single-column check.
+
+## Performance and accessibility considerations
+
+* **Performance:** engine work is CPU-trivial; dominant costs are network I/O (OpenAI, Supabase, Resend). Keep payloads small (structured JSON recommendations, not raw logs).  
+* **Images:** MVP is text-first; no heavy `next/image` surfaces required.  
+* **Accessibility:** forms expose `aria-invalid` and `role="alert"` for errors; async work uses `aria-busy` / polite live regions; share page heading levels differ from embedded landing results to preserve outline (`ResultsSummary` `resultsHeadingLevel` prop).  
+* **Smooth scroll:** `scroll-padding-top` accounts for sticky header height; audit section uses `scroll-mt-*` for in-page anchors.
 
 ## Validation Flow
 

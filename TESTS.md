@@ -46,10 +46,11 @@
    npm run test
    ```
 
-3. Run lint + typecheck + tests (local CI parity):
+3. Run lint + typecheck + tests + production build (full CI parity):
 
    ```bash
    npm run lint
    npm run typecheck
    npm run test
+   npm run build
    ```

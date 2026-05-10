@@ -29,3 +29,14 @@
 **What I learned:** A small amount of safety logic in savings aggregation dramatically improves trustworthiness of outputs. Writing tests before tuning copy made it easier to move fast without breaking core logic. Keeping business assumptions explicit in standalone docs helps separate product strategy from implementation details.
 **Blockers / what I'm stuck on:** No major blockers. Next reliability layer is endpoint-level rate limiting and request telemetry to validate anti-spam assumptions in production traffic.
 **Plan for tomorrow:** Run end-to-end smoke checks in staging, validate analytics events for funnel instrumentation, and tighten CI with optional build verification after deployment configuration is finalized.
+
+## Day 5 — 2026-05-11
+
+**Hours worked:** 6  
+**What I did:** Treated this as the “ship-ready” polish pass: fixed Next.js 15 dynamic route typings (`params` as a Promise) so `next build` passes cleanly, tightened production-oriented Next config (`reactStrictMode`, `poweredByHeader` off, compression), extended CI with a real production build step, and moved Supabase/Resend env validation to request time so CI/build do not require secrets. Improved accessibility and perceived quality across the audit funnel (form validation announcements, semantic heading levels on share vs landing, sticky scroll offset + anchor fixes, keyboard-friendly controls, subtle hover/transition polish, AI summary skeleton + status messaging, lead capture success feedback). Documented deployment on Vercel, production verification checklist, and added `USER_INTERVIEWS.md` plus `SUBMISSION_PREP.md`. Expanded architecture notes for deployment and performance/a11y and refreshed README for submission handoff.
+
+**What I learned:** Share pages and OG metadata are “free” distribution if you get canonical URLs and `metadataBase` right on day one—small code, high reviewer trust. Lazy env validation is a pragmatic tradeoff for serverless Next apps: compile-time stays simple, misconfiguration fails loudly at runtime on the affected route.
+
+**Blockers / what I'm stuck on:** No blockers for submission. Next step for real traffic is managed rate limiting (Upstash/Vercel firewall) because in-memory throttling is not durable on serverless.
+
+**Plan for next session:** Deploy to Vercel, capture screenshots + Loom, verify Resend domain deliverability, and add minimal request logging for audit/lead routes.

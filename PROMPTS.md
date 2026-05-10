@@ -66,3 +66,9 @@ This fallback is generated in `services/openai.ts` and guarantees the system alw
 - Use deterministic fallback summary whenever provider response is malformed or unavailable.
 - Keep pricing claims grounded in `PRICING_DATA.md` and deterministic engine outputs, not model inference.
 
+## Production verification notes (Day 5)
+
+- **JSON response format + low temperature** remain the main guardrails against rambling or markdown leakage in production.  
+- **UI loading state** intentionally appears *before* the model returns so users do not mistake “slow network” for “no summary.” If OpenAI is down, the experience degrades to the deterministic template without breaking the save/share flow.  
+- **Reviewer tip:** compare the AI summary text to the recommendation list—if they disagree, the list + numbers win; the summary is explanatory only.
+

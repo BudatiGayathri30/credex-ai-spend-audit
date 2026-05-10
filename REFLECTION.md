@@ -2,7 +2,9 @@
 
 ## Hardest bug
 
-The hardest bug was recommendation overcounting in aggregate savings. Multiple recommendations were individually valid but could not all be applied at once, which produced inflated total savings in some scenarios. I fixed this by introducing savings safety constraints and only realizing one recommendation path in summary math while still showing alternatives.
+The hardest bug was recommendation **overcounting** in aggregate savings: two suggestions could look great in isolation but were not simultaneously applicable, so the headline “total savings” became promotional instead of honest. Fixing it required tightening the engine (caps + choosing what to realize in the summary) **and** updating tests so the behavior could not regress quietly.
+
+A close second during the Day 5 hardening pass was a **silent `next build` failure** from the App Router’s evolving `params` typing (sync vs `Promise`), which only showed up in production builds—not in day-to-day `dev`. That reinforced why CI must include `next build`, not just typecheck.
 
 ## Reversed decision
 
@@ -19,10 +21,18 @@ I initially considered making recommendation rules more dynamic with weighted he
 
 I used AI heavily for draft copy, implementation acceleration, and documentation structure. I manually reviewed and edited all pricing assumptions, recommendation safeguards, and tests to keep outputs deterministic and believable. Final logic decisions and tradeoffs were made deliberately, not auto-accepted.
 
+**Limitations I still respect:** models are good at narrative and scaffolding, but they will happily “confirm” a savings story if you let them. This project keeps **numbers out of the model’s hands** (inputs are structured; pricing is in `lib/pricing.ts`) and uses JSON-only output + validation + fallback summaries to avoid brittle formatting.
+
 ## Self-rating
 
 - Product thinking: **8/10** (clear user value and funnel intent)
-- Engineering quality: **8/10** (strict TypeScript, CI, tests, safety constraints)
+- Engineering quality: **8.5/10** (strict TS, CI + build, tests, deployment-minded env handling)
 - Execution speed: **9/10** (full-stack MVP in staged increments)
-- Reliability mindset: **8/10** (fallback paths, anomaly handling, deterministic tests)
-- Communication/documentation: **9/10** (architecture, prompts, economics, GTM, metrics)
+- Reliability mindset: **8/10** (fallback paths, anomaly handling, deterministic tests; still needs real rate limits)
+- Communication/documentation: **9/10** (architecture, prompts, economics, GTM, metrics, submission prep)
+
+## What still needs improvement
+
+- **Observability:** structured logs + basic funnel events (anonymous) to validate drop-off between audit → share → lead.  
+- **Abuse controls:** move from documented intent to managed rate limiting + bot friction that survives serverless cold starts.  
+- **Calibration:** confidence thresholds should be tuned from real audit distributions, not only synthetic fixtures.
