@@ -21,7 +21,7 @@ const steps = [
 export function HowItWorksSection() {
   return (
     <section id="how-it-works" className="border-t border-border bg-background py-16 md:py-24">
-      <div className="container">
+      <div className="container px-4 sm:px-6 lg:px-8 scroll-mt-28">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">How it works</h2>
           <p className="mt-3 text-muted-foreground">A fast, founder-friendly workflow to understand and optimize AI costs.</p>

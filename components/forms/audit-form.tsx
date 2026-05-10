@@ -136,13 +136,13 @@ export function AuditForm() {
 
   return (
     <div className="space-y-8">
-      <Card>
+      <Card className="transition-shadow duration-200 hover:shadow-md">
         <CardHeader>
           <CardTitle className="text-2xl">Start your AI spend audit</CardTitle>
           <CardDescription>Fill in your details to generate savings recommendations from our local audit engine.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-busy={isSubmitting || isPersisting} noValidate>
             <div className="grid gap-5 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="aiTool">AI tool</Label>
@@ -153,7 +153,7 @@ export function AuditForm() {
                     setValue("plan", "", { shouldValidate: true });
                   }}
                 >
-                  <SelectTrigger id="aiTool">
+                  <SelectTrigger id="aiTool" aria-invalid={Boolean(errors.aiTool)} aria-required>
                     <SelectValue placeholder="Select an AI tool" />
                   </SelectTrigger>
                   <SelectContent>
@@ -164,13 +164,17 @@ export function AuditForm() {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.aiTool && <p className="text-xs text-red-600">{errors.aiTool.message}</p>}
+                {errors.aiTool ? (
+                  <p className="text-xs text-red-600" role="alert">
+                    {errors.aiTool.message}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="plan">Plan</Label>
                 <Select value={watch("plan")} onValueChange={(value) => setValue("plan", value, { shouldValidate: true })}>
-                  <SelectTrigger id="plan">
+                  <SelectTrigger id="plan" aria-invalid={Boolean(errors.plan)} aria-required>
                     <SelectValue placeholder="Select a plan" />
                   </SelectTrigger>
                   <SelectContent>
@@ -183,36 +187,87 @@ export function AuditForm() {
                       ))}
                   </SelectContent>
                 </Select>
-                {errors.plan && <p className="text-xs text-red-600">{errors.plan.message}</p>}
+                {errors.plan ? (
+                  <p className="text-xs text-red-600" role="alert">
+                    {errors.plan.message}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="monthlySpend">Monthly spend (USD)</Label>
-                <Input id="monthlySpend" type="number" min={0} step="1" {...register("monthlySpend", { valueAsNumber: true })} />
-                {errors.monthlySpend && <p className="text-xs text-red-600">{errors.monthlySpend.message}</p>}
+                <Input
+                  id="monthlySpend"
+                  type="number"
+                  min={0}
+                  step="1"
+                  aria-invalid={Boolean(errors.monthlySpend)}
+                  inputMode="decimal"
+                  {...register("monthlySpend", { valueAsNumber: true })}
+                />
+                {errors.monthlySpend ? (
+                  <p className="text-xs text-red-600" role="alert">
+                    {errors.monthlySpend.message}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="seats">Seats</Label>
-                <Input id="seats" type="number" min={1} step="1" {...register("seats", { valueAsNumber: true })} />
-                {errors.seats && <p className="text-xs text-red-600">{errors.seats.message}</p>}
+                <Input
+                  id="seats"
+                  type="number"
+                  min={1}
+                  step="1"
+                  aria-invalid={Boolean(errors.seats)}
+                  inputMode="numeric"
+                  {...register("seats", { valueAsNumber: true })}
+                />
+                {errors.seats ? (
+                  <p className="text-xs text-red-600" role="alert">
+                    {errors.seats.message}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="teamSize">Team size</Label>
-                <Input id="teamSize" type="number" min={1} step="1" {...register("teamSize", { valueAsNumber: true })} />
-                {errors.teamSize && <p className="text-xs text-red-600">{errors.teamSize.message}</p>}
+                <Input
+                  id="teamSize"
+                  type="number"
+                  min={1}
+                  step="1"
+                  aria-invalid={Boolean(errors.teamSize)}
+                  inputMode="numeric"
+                  {...register("teamSize", { valueAsNumber: true })}
+                />
+                {errors.teamSize ? (
+                  <p className="text-xs text-red-600" role="alert">
+                    {errors.teamSize.message}
+                  </p>
+                ) : null}
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="useCase">Use case</Label>
-              <Textarea id="useCase" placeholder="Describe how your team uses AI tools today." {...register("useCase")} />
-              {errors.useCase && <p className="text-xs text-red-600">{errors.useCase.message}</p>}
+              <Textarea
+                id="useCase"
+                placeholder="Describe how your team uses AI tools today."
+                aria-invalid={Boolean(errors.useCase)}
+                rows={4}
+                className="min-h-[100px]"
+                {...register("useCase")}
+              />
+              {errors.useCase ? (
+                <p className="text-xs text-red-600" role="alert">
+                  {errors.useCase.message}
+                </p>
+              ) : null}
             </div>
 
-            <Button type="submit" className="w-full md:w-auto" disabled={isSubmitting}>
-              {isSubmitting ? "Calculating..." : "Audit My AI Spend"}
+            <Button type="submit" className="w-full md:w-auto transition-opacity" disabled={isSubmitting || isPersisting}>
+              {isPersisting ? "Saving audit…" : isSubmitting ? "Calculating…" : "Audit My AI Spend"}
             </Button>
           </form>
         </CardContent>
@@ -220,15 +275,42 @@ export function AuditForm() {
 
       {auditResult && (
         <div className="space-y-6">
-          <ResultsSummary result={auditResult} aiSummary={aiSummary} />
+          <span className="sr-only" aria-live="polite">
+            {isPersisting && !auditId ? "Saving audit and generating an AI summary." : ""}
+            {!isPersisting && auditId ? "Audit saved. Share link is available below." : ""}
+          </span>
+
+          <ResultsSummary
+            result={auditResult}
+            aiSummary={aiSummary}
+            aiSummarySkeleton={Boolean(isPersisting && !auditId && !aiSummary)}
+          />
 
           <ShareAuditLink publicShareId={publicShareId} />
 
           {isPersisting && !auditId ? (
-            <p className="text-sm text-muted-foreground">Saving your audit and generating an AI summary...</p>
+            <div className="rounded-lg border border-dashed border-border bg-muted/20 p-4" role="status" aria-busy="true">
+              <div className="flex items-center gap-3">
+                <span
+                  className="inline-flex h-2 w-2 shrink-0 animate-pulse rounded-full bg-primary"
+                  aria-hidden
+                />
+                <p className="text-sm text-muted-foreground">
+                  Saving your audit and drafting the AI summary. You can scroll results while we finish.
+                </p>
+              </div>
+              <div className="mt-3 space-y-2" aria-hidden>
+                <div className="h-2 w-full max-w-md animate-pulse rounded bg-muted" />
+                <div className="h-2 w-4/5 max-w-sm animate-pulse rounded bg-muted" />
+              </div>
+            </div>
           ) : null}
 
-          {persistError ? <p className="text-sm text-red-600">{persistError}</p> : null}
+          {persistError ? (
+            <p className="text-sm text-red-600" role="alert">
+              {persistError}
+            </p>
+          ) : null}
 
           <LeadCaptureForm auditId={auditId} />
         </div>

@@ -19,12 +19,15 @@ export function ShareAuditLink({ publicShareId }: ShareAuditLinkProps) {
   if (!shareUrl) return null;
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
-      <p className="text-sm font-medium">Share your audit</p>
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4 transition-colors duration-200">
+      <p className="text-sm font-medium" id="share-audit-label">
+        Share your audit
+      </p>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Input value={shareUrl} readOnly className="sm:flex-1" />
+        <Input value={shareUrl} readOnly className="sm:flex-1 transition-colors" aria-labelledby="share-audit-label" />
         <Button
           type="button"
+          aria-label={copied ? "Link copied to clipboard" : "Copy shareable audit link to clipboard"}
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(shareUrl);

@@ -1,18 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL;
-
-if (!RESEND_API_KEY) {
-  throw new Error("Missing env var RESEND_API_KEY");
-}
-if (!RESEND_FROM_EMAIL) {
-  throw new Error("Missing env var RESEND_FROM_EMAIL");
-}
-
-const resend = new Resend(RESEND_API_KEY);
-
 export interface SendLeadConfirmationInput {
   toEmail: string;
   monthlySavings: number;
@@ -28,6 +16,17 @@ function formatUsd(value: number): string {
 }
 
 export async function sendLeadConfirmationEmail(input: SendLeadConfirmationInput): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
+  if (!apiKey) {
+    throw new Error("Missing env var RESEND_API_KEY");
+  }
+  if (!fromEmail) {
+    throw new Error("Missing env var RESEND_FROM_EMAIL");
+  }
+
+  const resend = new Resend(apiKey);
+
   const subject = "Your Credex AI Spend Audit is ready";
   const monthly = formatUsd(input.monthlySavings);
   const annual = formatUsd(input.annualSavings);
@@ -53,7 +52,7 @@ export async function sendLeadConfirmationEmail(input: SendLeadConfirmationInput
   `;
 
   await resend.emails.send({
-    from: RESEND_FROM_EMAIL!,
+    from: fromEmail,
     to: input.toEmail,
     subject,
     html

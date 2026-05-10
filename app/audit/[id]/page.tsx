@@ -19,8 +19,9 @@ function truncate(text: string, maxLength: number): string {
   return `${t.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const audit = await getPublicShareAudit(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const audit = await getPublicShareAudit(id);
   if (!audit) {
     return {
       title: "Credex | AI Spend Audit",
@@ -32,13 +33,16 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const description = truncate(audit.aiSummary, 160);
   const title = `Credex AI Spend Audit: Save ${monthly}/mo`;
 
+  const canonicalBase = process.env.NEXT_PUBLIC_APP_URL;
+
   return {
     title,
     description,
     openGraph: {
       title,
       description,
-      type: "website"
+      type: "website",
+      url: canonicalBase ? `${canonicalBase.replace(/\/$/, "")}/audit/${id}` : undefined
     },
     twitter: {
       card: "summary",
@@ -48,8 +52,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function AuditSharePage({ params }: { params: { id: string } }) {
-  const audit = await getPublicShareAudit(params.id);
+export default async function AuditSharePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const audit = await getPublicShareAudit(id);
   if (!audit) notFound();
 
   const auditResult: AuditResult = {
@@ -77,7 +82,7 @@ export default async function AuditSharePage({ params }: { params: { id: string 
             <p className="text-sm text-muted-foreground">Founder-friendly recommendations based on your inputs.</p>
           </div>
 
-          <ResultsSummary result={auditResult} aiSummary={audit.aiSummary} />
+          <ResultsSummary result={auditResult} aiSummary={audit.aiSummary} resultsHeadingLevel={2} />
         </div>
       </div>
     </main>

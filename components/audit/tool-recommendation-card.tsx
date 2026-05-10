@@ -21,7 +21,7 @@ function confidenceTone(confidence: number): string {
 
 export function ToolRecommendationCard({ recommendation }: ToolRecommendationCardProps) {
   return (
-    <Card className="h-full">
+    <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md">
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-medium capitalize text-indigo-700">{recommendation.type}</span>

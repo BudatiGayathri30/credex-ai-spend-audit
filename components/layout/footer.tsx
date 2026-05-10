@@ -3,7 +3,7 @@ import Link from "next/link";
 const footerLinks = [
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Audit", href: "#audit" }
+  { label: "Audit", href: "#audit-form" }
 ];
 
 const socialLinks = [
@@ -27,8 +27,10 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col gap-6 sm:flex-row sm:gap-12">
-            <nav className="space-y-2">
-              <p className="text-sm font-medium">Navigation</p>
+            <nav className="space-y-2" aria-labelledby="footer-nav-label">
+              <p id="footer-nav-label" className="text-sm font-medium">
+                Navigation
+              </p>
               {footerLinks.map((link) => (
                 <a key={link.label} href={link.href} className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
                   {link.label}
@@ -36,8 +38,10 @@ export function Footer() {
               ))}
             </nav>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Social</p>
+            <div className="space-y-2" aria-labelledby="footer-social-label">
+              <p id="footer-social-label" className="text-sm font-medium">
+                Social
+              </p>
               {socialLinks.map((social) => (
                 <a key={social.label} href={social.href} className="block text-sm text-muted-foreground transition-colors hover:text-foreground">
                   {social.label}

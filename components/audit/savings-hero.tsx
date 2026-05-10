@@ -14,11 +14,11 @@ function formatUsd(value: number): string {
 
 export function SavingsHero({ summary }: SavingsHeroProps) {
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
       <p className="text-sm font-medium text-emerald-700">Estimated savings opportunity</p>
-      <h3 className="mt-2 text-3xl font-semibold tracking-tight text-emerald-900 md:text-4xl">
+      <p className="mt-2 text-3xl font-semibold tracking-tight text-emerald-900 md:text-4xl" aria-live="polite">
         {formatUsd(summary.totalSavings.monthly)} / month
-      </h3>
+      </p>
       <p className="mt-1 text-sm text-emerald-700">~{formatUsd(summary.totalSavings.annual)} per year</p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">

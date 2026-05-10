@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { leadCaptureSchema, type LeadCaptureValues } from "@/lib/validations/lead-capture";
@@ -61,7 +62,7 @@ export function LeadCaptureForm({ auditId, onLeadSaved }: LeadCaptureFormProps) 
   };
 
   return (
-    <Card className="border-border bg-card/50">
+    <Card className="border-border bg-card/50 transition-colors duration-200">
       <CardHeader>
         <CardTitle className="text-xl">Get your confirmation</CardTitle>
         <CardDescription className="text-sm">
@@ -70,18 +71,39 @@ export function LeadCaptureForm({ auditId, onLeadSaved }: LeadCaptureFormProps) 
       </CardHeader>
       <CardContent>
         {leadSaved ? (
-          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-4">
-            <p className="text-sm font-medium">Saved.</p>
-            <p className="text-sm text-muted-foreground">
-              {emailSent ? "Check your inbox for the confirmation email." : "We saved your audit details. We couldn’t send email right now."}
-            </p>
+          <div
+            className="flex gap-3 rounded-lg border border-emerald-200/80 bg-emerald-50/50 p-4 text-emerald-950 opacity-100 transition-opacity duration-300"
+            role="status"
+            aria-live="polite"
+          >
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Saved — thanks.</p>
+              <p className="text-sm text-muted-foreground">
+                {emailSent
+                  ? "Check your inbox for the confirmation email."
+                  : "We saved your details. Email confirmation could not be sent right now; you can still use your share link."}
+              </p>
+            </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="leadEmail">Work email</Label>
-              <Input id="leadEmail" type="email" placeholder="you@startup.com" {...register("email")} disabled={!auditId} />
-              {errors.email && <p className="text-xs text-red-600">{errors.email.message}</p>}
+              <Input
+                id="leadEmail"
+                type="email"
+                placeholder="you@startup.com"
+                aria-invalid={Boolean(errors.email)}
+                autoComplete="email"
+                {...register("email")}
+                disabled={!auditId}
+              />
+              {errors.email ? (
+                <p className="text-xs text-red-600" role="alert">
+                  {errors.email.message}
+                </p>
+              ) : null}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -93,20 +115,32 @@ export function LeadCaptureForm({ auditId, onLeadSaved }: LeadCaptureFormProps) 
                   {...register("companyName")}
                   disabled={!auditId}
                 />
-                {errors.companyName && <p className="text-xs text-red-600">{errors.companyName.message}</p>}
+                {errors.companyName ? (
+                <p className="text-xs text-red-600" role="alert">
+                  {errors.companyName.message}
+                </p>
+              ) : null}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="role">Role (optional)</Label>
                 <Input id="role" placeholder="Founder / Head of Engineering" {...register("role")} disabled={!auditId} />
-                {errors.role && <p className="text-xs text-red-600">{errors.role.message}</p>}
+                {errors.role ? (
+                <p className="text-xs text-red-600" role="alert">
+                  {errors.role.message}
+                </p>
+              ) : null}
               </div>
             </div>
 
-            {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+            {errorMessage ? (
+              <p className="text-sm text-red-600" role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
 
-            <Button type="submit" className="w-full" disabled={!canSubmit}>
-              {isSaving ? "Saving..." : "Save & send confirmation"}
+            <Button type="submit" className="w-full transition-opacity" disabled={!canSubmit}>
+              {isSaving ? "Saving…" : "Save & send confirmation"}
             </Button>
 
             <p className="text-xs text-muted-foreground">
